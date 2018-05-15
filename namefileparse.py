@@ -14,14 +14,19 @@ def collectWordCombos(words):
     combo = ''
     x = 0
     for word in words:
+        word = word.strip()
         match = re.search("^[a-z]+$", word)
         if match:
-            combo += ' ' + word
+            if combo:
+                combo += ' ' + word
+            else:
+                combo = word
+                
             x += 1
             if x == 2:
-                x = 0
+                x = 1
                 list.append(combo)
-                combo = ''
+                combo = word
     return list
 
 def displayFindings(groups):
