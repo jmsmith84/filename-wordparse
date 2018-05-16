@@ -3,13 +3,15 @@ import os
 import sys
 import operator
 import re
+import argparse
 from collections import defaultdict
-
-minCutoff = 1
-ignoreExts = []
-ignoreCombos = []
-groups = defaultdict(list)
-initialdir = os.getcwd()
+###################################
+def parseCmdArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--debug', action='store_true')
+    parser.add_argument('--name', help='Look only for specific name')
+    parser.add_argument('--min', type=int, help='Display only results with at least MIN found')
+    return parser.parse_args()
 
 def collectWordCombos(words):
     list = []
@@ -33,30 +35,48 @@ def collectWordCombos(words):
     return list
 
 def displayFindings(groups):
+    print("\nResults:")
     sortedlist = sorted(groups.items(), key=operator.itemgetter(1))
-
     for i in sortedlist:
         if i[1] >= minCutoff:
-            print ("%s [%d]" % (i[0], i[1]))
+            if not args.name or (args.name and i[0] == args.name):
+                print("%s [%d]" % (i[0], i[1]))
 
+def cleanSplitWords(basename):
+    cleaned = basename.replace('_', ' ')
+    cleaned = cleaned.replace('-', ' ')
+    cleaned = cleaned.replace('.', ' ')
+    cleaned = cleaned.strip()
+    cleaned = cleaned.lower()
+    printDebug("cleaned: %s" % cleaned)
+    return cleaned.split(' ')
+###################################
+args = parseCmdArgs()
+debug = args.debug
+minCutoff = args.min or 1
+ignoreExts = []
+ignoreCombos = []
+groups = defaultdict(list)
+initialdir = os.getcwd()
+
+def printDebug(string):
+    if args.debug:
+        print(string)
 
 for path, directories, files in os.walk(initialdir):
     for file in files:
          basename, ext = os.path.splitext(file)
          ext = ext.lstrip('.')
          if ext not in ignoreExts:
-             print("-found: %s.%s" % (basename, ext))
-             cleaned = basename.replace('_', ' ')
-             cleaned = cleaned.replace('-', ' ')
-             cleaned = cleaned.replace('.', ' ')
-             cleaned = cleaned.strip()
-             cleaned = cleaned.lower()
+             printDebug("-found: %s.%s" % (basename, ext))
 
-             #print("cleaned: %s" % cleaned)
-             words = cleaned.split(' ')
+             words = cleanSplitWords(basename)
              combos = collectWordCombos(words)
 
              for combo in combos:
+                 if args.name and combo == args.name:
+                     print(file)
+
                  if not groups[combo]:
                     groups[combo] = 1
                  else:
