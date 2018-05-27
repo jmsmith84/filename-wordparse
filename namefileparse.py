@@ -11,7 +11,10 @@ def parseCmdArgs():
     parser.add_argument('--debug', action='store_true')
     parser.add_argument('--name', help='Look only for specific name')
     parser.add_argument('--min', type=int, help='Display only results with at least MIN found')
-    return parser.parse_args()
+    args = parser.parse_args()
+    args.name = args.name.lower()
+    args.name = args.name.strip()
+    return args
 
 def collectWordCombos(words):
     list = []
