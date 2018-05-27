@@ -78,7 +78,7 @@ for path, directories, files in os.walk(initialdir):
 
              for combo in combos:
                  if args.name and combo == args.name:
-                     print(path + '/' + file)
+                     print(os.path.join(path, file))
 
                  if not groups[combo]:
                     groups[combo] = 1
